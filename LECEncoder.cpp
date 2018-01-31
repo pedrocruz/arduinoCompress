@@ -9,6 +9,13 @@ LECEncoder::LECEncoder(File &file){
   _stream.bits_number = 0;
 }
 
+/*LECEncoder::LECEncoder(int * codes_table){
+  table = codes_table;
+  _file = SD.open("O.TXT", FILE_WRITE);
+  _stream.value = 0;
+  _stream.bits_number = 0;
+}*/
+
 LECEncoder::LECEncoder(){
   _file = SD.open("O.TXT", FILE_WRITE);
   _stream.value = 0;
@@ -33,7 +40,7 @@ void LECEncoder::encode(int value){
 
 int LECEncoder::append_byte(char value, int bits_number){
   Serial.print("appendByte "); Serial.print(value, BIN);
-    Serial.print(" "); Serial.println(bits_number);
+  Serial.print(" "); Serial.println(bits_number);
 
 
   int remaining_bits = bits_number;
@@ -48,10 +55,11 @@ int LECEncoder::append_byte(char value, int bits_number){
     _stream.bits_number ++;
 
     Serial.print("stream.bits = "); Serial.println(_stream.value, BIN);
+    Serial.print("stream.bits_number = "); Serial.println(_stream.bits_number);
     if (_stream.bits_number >= 8){
       Serial.print("File = ");
       Serial.println(_file);
-      Serial.print("print to file");
+      Serial.print("print to file ");
       Serial.println(_stream.value, BIN);
       _file.write(_stream.value);
       //_file.println("HEEY?");
@@ -94,7 +102,9 @@ int LECEncoder::get_a(int d_value, int n){
 }
 
 LECEncoder::~LECEncoder(){
+  Serial.println("end");
   if (_stream.bits_number > 0){
+    Serial.println("flushing");
     _stream.value << (8 - _stream.bits_number);
     _file.write(_stream.value);
     _stream.bits_number = 0;

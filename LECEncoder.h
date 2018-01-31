@@ -27,10 +27,13 @@ class LECEncoder
   public:
     LECEncoder(File &file);
     LECEncoder();
+    LECEncoder(int* table);
     ~LECEncoder();
     void encode(int value);
     int table[4] =     {B1,        B0110,     B0000,     B010}; // Relates every n with a bitmask
-    int s_size[4] =    {1,         4,         4,		 3}; // Number of bits in every s
+    //int * table;
+    //int table_size;
+    int s_size[4] =    {1,         4,         4,     3}; // Number of bits in every s
     byte bitmasks[5] = {B00000000, B00000001, B00000011, B00000111, B00001111};
 
   private:
