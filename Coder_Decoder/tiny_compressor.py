@@ -7,6 +7,8 @@ import cPickle as pickle
 OFFSET_ZERO = BitArray(bin='0')
 OFFSET_ONE = BitArray(bin='1')
 
+MAX_DATA_N = 15
+
 def get_decimal_places(d):
     r = d.split(".")
     if len(r) > 1:
@@ -79,6 +81,8 @@ class TinyCompressor:
                     self.__previous_data = linedata[:]
 
         print "Data len =", len(self.__data)
+        print "adding range MAX_DATA_N"
+        self.__data_ns += range(MAX_DATA_N)
 
 
 
@@ -98,10 +102,14 @@ class TinyCompressor:
         self.generate_data_list(inputfilename)
         self.__compressed_data_string = ""
 
-        for i in range(len(self.__data)):
-            self.__compressed_data_string += \
-                self.__strings_table[self.__data_ns[i]] + \
-                self.get_a(self.__data[i], self.__data_ns[i]) 
+        try:
+            for i in range(len(self.__data)):
+                self.__compressed_data_string += \
+                    self.__strings_table[self.__data_ns[i]] + \
+                    self.get_a(self.__data[i], self.__data_ns[i]) 
+        except KeyError:
+            print "Not possible to encode data[{}] = {}".format(i, self.__data[i])
+            return
 
         #Add EOF
         self.__compressed_data_string += self.__strings_table[self.eof]
@@ -196,14 +204,17 @@ class TinyCompressor:
 
 
 #example
-input_file_name = "A.TXT"
+table_file_name = "pdg-tmp-parameter.txt"
+input_file_name = "pdg-tmp-test.txt"
 output_file_name = "ENCODED.TXT"
 decoded_file_name = "DECODED.TXT"
 
-first_values = [300317183956,-22.86139,-43.22784,140,25,34,1] #a
+#first_values = [300317183956,-22.86139,-43.22784,140,25,34,1] #a
+#t = TinyCompressor([0,5,5,0,0,0,0]) #a
 
-t = TinyCompressor([0,5,5,0,0,0,0])
-t.generate_table(input_file_name)
+first_values = [-10.64] #pdg
+t = TinyCompressor([2]) #pdg
+t.generate_table(table_file_name)
 
 print "Table: "
 t.codec.print_code_table()
@@ -211,3 +222,23 @@ t.codec.print_code_table()
 t.encode_data(input_file_name, output_file_name)
 
 t.decode_data(first_values, output_file_name, decoded_file_name)
+
+
+#build __strings table from LEC codes
+lec_table = {
+    0:"00",
+    1:"010",
+    2:"011",
+    3:"100",
+    4:"101",
+    5:"110",
+    6:"1110",
+    7:"11110",
+    8:"111110",
+    9:"1111110",
+    10:"11111110",
+    11:"111111110",
+    12:"1111111110",
+    13:"11111111110",
+    14:"111111111110"
+}
