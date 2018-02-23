@@ -32,12 +32,16 @@ class TinyCompressor:
     __compressed_data = BitArray()
     __compressed_data_string = ""
     __data_length = 0
+    data_frequencies = {}
 
     __d_values = []
     codec = 0
 
     def __init__(self, decimal_places):
         self.__decimal_places = decimal_places[:]
+
+    def set_strings_table(self, new_strings_table):
+        self.__strings_table = new_strings_table
 
     def get_n(self, d_value):
         if d_value == 0:
@@ -58,6 +62,7 @@ class TinyCompressor:
         self.__previous_data = []
         self.__data_ns = []
         self.__data = []
+        self.data_frequencies = {}
         with open(inputfilename) as inputfile:
             for line in inputfile:
                 linedata = line.split(",")
@@ -116,6 +121,8 @@ class TinyCompressor:
 
         self.__compressed_data = BitArray(bin=self.__compressed_data_string)
         #print "Compressed data to file:", self.__compressed_data.bin
+
+    def to_file(self):
         with open(outputfilename, 'wb') as outputfile:
             self.__compressed_data.tofile(outputfile)
 
@@ -203,27 +210,9 @@ class TinyCompressor:
 
 
 
-#example
-table_file_name = "pdg-tmp-parameter.txt"
-input_file_name = "pdg-tmp-test.txt"
-output_file_name = "ENCODED.TXT"
-decoded_file_name = "DECODED.TXT"
-
-#first_values = [300317183956,-22.86139,-43.22784,140,25,34,1] #a
-#t = TinyCompressor([0,5,5,0,0,0,0]) #a
-
-first_values = [-10.64] #pdg
-t = TinyCompressor([2]) #pdg
-t.generate_table(table_file_name)
-
-print "Table: "
-t.codec.print_code_table()
-
-t.encode_data(input_file_name, output_file_name)
-
-t.decode_data(first_values, output_file_name, decoded_file_name)
 
 
+"""
 #build __strings table from LEC codes
 lec_table = {
     0:"00",
@@ -240,5 +229,15 @@ lec_table = {
     11:"111111110",
     12:"1111111110",
     13:"11111111110",
-    14:"111111111110"
+    14:"111111111110",
+    t.eof:"1111111111110"
 }
+
+
+input_file_name = "pdg-tmp-test.txt"
+output_file_name = "ENCODED_LEC.TXT"
+decoded_file_name = "DECODED_LEC.TXT"
+
+t.set_strings_table(lec_table)
+t.encode_data(input_file_name, output_file_name)
+t.decode_data(first_values, output_file_name, decoded_file_name)"""
